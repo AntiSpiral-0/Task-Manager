@@ -2,12 +2,18 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
+using System.Data;
+using MySql.Data;
+using Dapper;
+using System.Reflection.Metadata.Ecma335;
+
 namespace Management
 {
     class UserRepository
     {
         private string user;
         private string email;
+        private string position;
         private int number;
         private string password;
 
@@ -31,12 +37,18 @@ namespace Management
             get { return number; }
             set { number = value; }
         }
-        public UserRepository(string user, string password, string email, int number)
+        public string Position
+        {
+            get { return position; }
+            set { position = value; }
+        }
+        public UserRepository(string user, string password, string email, int number, string position)
         {
             User = user;
             Password = password;
             Email = email;
             Number = number;
+            Position = position;
         }
         public static bool CheckEmail(string mail)
         {
@@ -61,7 +73,6 @@ namespace Management
             {
                 return true;
             }
-
         }
         public static bool CheckPassword(string password)
         {
@@ -69,13 +80,11 @@ namespace Management
 
             try
             {
-               
                 if (password.Length < minimumPasswordLength)
                 {
                     throw new ArgumentException("Password must be at least 8 characters long.");
                 }
 
-              
                 bool hasUpperCase = false;
                 foreach (char ch in password)
                 {
@@ -90,7 +99,6 @@ namespace Management
                     throw new ArgumentException("Password must contain at least one uppercase letter.");
                 }
 
-    
                 bool hasLowerCase = false;
                 foreach (char ch in password)
                 {
@@ -105,7 +113,6 @@ namespace Management
                     throw new ArgumentException("Password must contain at least one lowercase letter.");
                 }
 
-                
                 bool hasDigit = false;
                 foreach (char ch in password)
                 {
@@ -135,7 +142,7 @@ namespace Management
                     throw new ArgumentException("Password must contain at least one special character.");
                 }
 
-                return true; 
+                return true;
             }
             catch (ArgumentException ex)
             {
@@ -143,9 +150,8 @@ namespace Management
                 return false;
             }
         }
-
-
     }
+
     class logged
     {
         private UserRepository user1;
@@ -160,12 +166,13 @@ namespace Management
             User1 = user;
         }
     }
+
     class Access
     {
         static List<UserRepository> users = new List<UserRepository>();
         static List<logged> LoggedUsers = new List<logged>();
 
-        public void SignUp()
+        public bool SignUp()
         {
             Console.WriteLine("Please Choose Y if you're adding someone and N if you are finished");
             string choice = Console.ReadLine();
@@ -179,41 +186,52 @@ namespace Management
                 int NUM = Convert.ToInt32(Console.ReadLine());
                 Console.WriteLine("Please Write a Password");
                 string PW = Console.ReadLine();
+                Console.WriteLine("Please Write your position");
+                string POS = Console.ReadLine();
                 foreach (UserRepository userRepository in users)
                 {
                     if (userRepository.User == UN)
                     {
                         Console.WriteLine("Apologies, this name is taken !");
-                        break;
+                        return false;
                     }
                     else if ((userRepository.Email == EM) || UserRepository.CheckEmail(EM))
                     {
                         Console.WriteLine("Apologies, this email is taken or not valid !");
-                        break;
+                        return false;
                     }
                     else if (userRepository.Number == NUM)
                     {
                         Console.WriteLine("Apologies, this number is taken !");
-                        break;
+                        return false;
                     }
                     else if (UserRepository.CheckPassword(PW))
                     {
-
+                        
                     }
                     else
                     {
-                        UserRepository user = new UserRepository(UN, PW, EM, NUM);
+                        UserRepository user = new UserRepository(UN, PW, EM, NUM, POS);
                         users.Add(user);
+                        return true;
                     }
                 }
+
+                // 
+                UserRepository newUser = new UserRepository(UN, PW, EM, NUM, POS);
+                users.Add(newUser);
+                return true;
             }
+            return false; 
         }
-        public void Login()
+
+        public static bool Login()
         {
             Console.WriteLine("Welcome! Please write your username !");
             string Userinput1 = Console.ReadLine();
             Console.WriteLine("Please Write down your password");
             string userinput2 = Console.ReadLine();
+
             foreach (UserRepository us in users)
             {
                 if ((us.User == Userinput1) && (us.Password == userinput2))
@@ -221,18 +239,16 @@ namespace Management
                     logged loggeduser = new logged(us);
                     Console.WriteLine($"Welcome {Userinput1} you are now logged in !");
                     LoggedUsers.Add(loggeduser);
-                }
-                else
-                {
-                    Console.WriteLine("Apologies , your username doesn't exist in our database");
-                    break;
+                    return true;
                 }
             }
+
+            Console.WriteLine("Apologies, your username doesn't exist in our database");
+            return false;
         }
-        public void Logout()
+
+        public bool Logout()
         {
-
-
             Console.WriteLine("Please write your username to log out");
             string us = Console.ReadLine();
 
@@ -242,11 +258,12 @@ namespace Management
                 {
                     Console.WriteLine($"You have successfully logged out {LoggedUsers[i].User1.User}");
                     LoggedUsers.RemoveAt(i);
-                    return;
+                    return true;
                 }
             }
 
             Console.WriteLine("Username is incorrect! Try again.");
+            return false;
         }
     }
 }
