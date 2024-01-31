@@ -224,47 +224,6 @@ namespace Management
             }
             return false; 
         }
-
-        public static bool Login()
-        {
-            Console.WriteLine("Welcome! Please write your username !");
-            string Userinput1 = Console.ReadLine();
-            Console.WriteLine("Please Write down your password");
-            string userinput2 = Console.ReadLine();
-
-            foreach (UserRepository us in users)
-            {
-                if ((us.User == Userinput1) && (us.Password == userinput2))
-                {
-                    logged loggeduser = new logged(us);
-                    Console.WriteLine($"Welcome {Userinput1} you are now logged in !");
-                    LoggedUsers.Add(loggeduser);
-                    return true;
-                }
-            }
-
-            Console.WriteLine("Apologies, your username doesn't exist in our database");
-            return false;
-        }
-
-        public bool Logout()
-        {
-            Console.WriteLine("Please write your username to log out");
-            string us = Console.ReadLine();
-
-            for (int i = 0; i < LoggedUsers.Count; i++)
-            {
-                if (LoggedUsers[i].User1.User == us)
-                {
-                    Console.WriteLine($"You have successfully logged out {LoggedUsers[i].User1.User}");
-                    LoggedUsers.RemoveAt(i);
-                    return true;
-                }
-            }
-
-            Console.WriteLine("Username is incorrect! Try again.");
-            return false;
-        }
     }
 }
 
